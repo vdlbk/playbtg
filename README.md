@@ -12,6 +12,7 @@ TODO : write desc
 * [ ]  Proposer un mode avec des phrases
 * [ ]  Proposer un mode avec des symboles (pas d'accent)
 * [ ]  Proposer un mode avec du code à ré-écrire (de simples lignes pour l'instant
+* [ ]  Ajouter plus de stats (écart type, percentile?)
 * [ ]  Faire des stats sur la perf par longueur du mot
 * [ ]  Proposer un mode, le plus de mot en x secondes
 * [ ]  Proposer un mode où l'ordi génère des mauvaises lettres qu'il faut effacer
