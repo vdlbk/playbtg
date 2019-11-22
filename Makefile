@@ -11,7 +11,7 @@ clean: ## Remove working files and binary file
 	@rm -Rf dist
 
 build: ## Build the binary file
-	@CGO_ENABLED=0 GOGC=off GOOS=linux GOARCH=amd64 go build -v -a -installsuffix nocgo -o dist/$(APP_NAME) main.go
+	@CGO_ENABLED=0 GOGC=off GOOS=linux GOARCH=amd64 go build -v -a -installsuffix nocgo -o dist/$(APP_NAME) $(APP_NAME).go
 
 docker-build: ## Build docker image with latest tag
 	@docker build --tag=$(APP_NAME):latest .
@@ -24,7 +24,7 @@ test: ## Run unit tests
 	@go test -v $(PKGS)
 
 start: ## Start the app
-	@go run main.go
+	@go run $(APP_NAME).go
 
 run-bin: build ## Start the app from binary file
 	@dist/$(APP_NAME)
