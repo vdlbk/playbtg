@@ -25,8 +25,13 @@ var rootCmd = &cobra.Command{
 	Run:              root,
 }
 
+var gameConfig = structs.GameConfig{}
+
 func init() {
 	rand.Seed(time.Now().UnixNano())
+
+	rootCmd.Flags().BoolVarP(&gameConfig.UpperMode, consts.ParamUpperMode, "u", false, "The words will be displayed in uppercase")
+	rootCmd.Flags().BoolVarP(&gameConfig.MixUpperLowerMode, consts.ParamMixUpperLowerMode, "m", false, "The words will be displayed with a mix of character in uppercase and lowercase")
 }
 
 func Execute() {
@@ -51,23 +56,14 @@ func root(cmd *cobra.Command, args []string) {
 		}
 	}()
 
-	min := len(utils.WordSet)
-	max := 0
-	for k, _ := range utils.WordSet {
-		if k < min {
-			min = k
-		}
-		if k > max {
-			max = k
-		}
-	}
+	min, max := utils.ComputeBounds(utils.WordSet)
 
 	for {
 		x := rand.Intn(max - min) + min
 		words := utils.WordSet[x]
 		y := rand.Intn(len(words))
 
-		expectedText := words[y]
+		expectedText := transformWord(words[y], gameConfig)
 		reader := bufio.NewReader(os.Stdin)
 
 		doOnce.Do(func() {
@@ -95,6 +91,22 @@ func root(cmd *cobra.Command, args []string) {
 			}
 		}
 	}
+}
+func transformWord(word string, config structs.GameConfig) string {
+	if config.UpperMode {
+		word = strings.ToUpper(word)
+	} else if config.MixUpperLowerMode {
+		transformedWord := ""
+		for _, c := range word {
+			if utils.FiftyFifty() {
+				transformedWord += strings.ToUpper(string(c))
+			} else {
+				transformedWord += string(c)
+			}
+		}
+		word = transformedWord
+	}
+	return word
 }
 
 func printFinal(nbSuccess int, nbError int, events []structs.Event) {
