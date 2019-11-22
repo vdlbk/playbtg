@@ -5,16 +5,17 @@ TODO : write desc
 
 ## Roadmap
 
-* [ ]  Proposer un mode avec majuscule et ou un mélange minuscule/majuscule
-* [ ]  Proposer un mode avec des chiffres
-* [ ]  Faire la différence entre le mot voulu et la réponse, de la obtenir une liste de caractère où on a du mal (attention différence de longueur)
-* [ ]  Faire un système de fire (rythme, délai entre 2 mots, malus de temps si erreur ...)
-* [ ]  Proposer un mode avec des phrases
-* [ ]  Proposer un mode avec des symboles (pas d'accent)
-* [ ]  Proposer un mode avec du code à ré-écrire (de simples lignes pour l'instant
-* [ ]  Ajouter plus de stats (écart type, percentile?)
-* [ ]  Faire des stats sur la perf par longueur du mot
-* [ ]  Proposer un mode, le plus de mot en x secondes
-* [ ]  Proposer un mode où l'ordi génère des mauvaises lettres qu'il faut effacer
-* [ ]  Save le record de rapidité
-* [ ]  Premettre d'import ses propres mots
+* [x]  Create uppercase mode
+* [x]  Create mixin uppercase/lowercase mode
+* [ ]  Create mode with numbers
+* [ ]  Compute/Detect errors and display a list of characters on which the user should practice
+* [ ]  Create a fire system (based on: rythm, delay between words, time penalty in case of errors...)
+* [ ]  Create a mode with sentences
+* [ ]  Create a mode with symbols
+* [ ]  Create a mode with line codes
+* [ ]  Compute more stats (standard deviation, percentile?)
+* [ ]  Compute stats on word length
+* [ ]  Create a mode with a maximum of word (defined length) in x seconds
+* [ ]  Create a mode where the game change the letter during typing. You would have to be careful before pressing Return
+* [ ]  Save some records
+* [ ]  Add feature to imports his own words
