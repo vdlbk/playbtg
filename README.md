@@ -1,7 +1,35 @@
 # Bash typing game
 
 ## What it is ?
-TODO : write desc
+**Bash typing game** is a small game that you can run from your terminal. It challenges you during multiple typing games.
+
+## Install
+```bash
+go get -u github.com/vdlbk/playbtg
+```
+
+## Usage 
+### Start the game
+```bash
+playbtg
+```
+
+### Help & Options
+```bash
+playbtg --help
+
+playbtg
+
+Usage:
+  playbtg [flags]
+
+Flags:
+  -h, --help               help for playbtg
+  -n, --number-mode        The words will be replaced by numbers
+  -m, --upper-lower-mode   The words will be displayed with a mix of character in uppercase and lowercase
+  -u, --upper-mode         The words will be displayed in uppercase
+      --version            version for playbtg
+```
 
 ## Roadmap
 
