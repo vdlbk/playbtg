@@ -133,6 +133,10 @@ func transformWord(word string, config structs.GameConfig) string {
 
 func printFinal(nbSuccess int, nbError int, events []structs.Event) {
 	fmt.Println()
+	if len(events) == 0 {
+		return
+	}
+
 	var result = float64(nbSuccess) / float64(nbSuccess+nbError) * 100
 	total := int64(0)
 	wordsResult := make([][]string, 0)
