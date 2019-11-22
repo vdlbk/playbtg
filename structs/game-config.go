@@ -1,6 +1,7 @@
 package structs
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/olekukonko/tablewriter"
 	"github.com/vdlbk/playbtg/utils/consts"
@@ -34,13 +35,9 @@ func (g GameConfig) Render() {
 }
 
 func (g GameConfig) String() string {
-	s := ""
-	rg := reflect.ValueOf(g)
-
-	for i := 0; i < rg.NumField(); i++ {
-		if v := rg.Type().Field(i).Tag.Get(consts.TagKey); v != "-" {
-			s += fmt.Sprintf(" %s: %v\n", v, rg.Field(i))
-		}
+	b, err := json.Marshal(g)
+	if err != nil {
+		return ""
 	}
-	return s
+	return string(b)
 }
