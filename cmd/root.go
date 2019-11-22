@@ -79,16 +79,19 @@ func root(cmd *cobra.Command, args []string) {
 			}
 		})
 
+		event := structs.Event{Word: expectedText}
 		for {
 			fmt.Printf("Enter [%s]: ", expectedText)
 			start := time.Now()
 			text, _ := reader.ReadString('\n')
 			text = strings.Replace(text, "\n", "", -1)
 			if text == expectedText {
-				events = append(events, structs.Event{expectedText, time.Since(start)})
+				event.Duration = time.Since(start)
+				events = append(events, event)
 				nbSuccess++
 				break
 			} else {
+				event.Attempts = append(event.Attempts, text)
 				nbError++
 			}
 
@@ -141,13 +144,13 @@ func printFinal(nbSuccess int, nbError int, events []structs.Event) {
 	total := int64(0)
 	wordsResult := make([][]string, 0)
 	for _, e := range events {
-		wordsResult = append(wordsResult, []string{e.Word, e.Duration.String()})
+		wordsResult = append(wordsResult, []string{e.Word, e.Duration.String(), e.Attempts.String()})
 		total += e.Duration.Nanoseconds()
 	}
 	avg := total / int64(len(events))
 	tref := time.Unix(0, avg)
 	dref := tref.Sub(time.Unix(0, 0))
-	wordsResult = append(wordsResult, []string{"Average", dref.String()})
+	wordsResult = append(wordsResult, []string{"Average", dref.String(), ""})
 
 	data := [][]string{
 		{"Success", fmt.Sprintf("%d", nbSuccess), fmt.Sprintf("%.2f", result)},
@@ -157,7 +160,7 @@ func printFinal(nbSuccess int, nbError int, events []structs.Event) {
 
 	printTable(data, []string{"", "Result", "%"})
 	fmt.Println()
-	printTable(wordsResult, []string{"Word", "Duration"})
+	printTable(wordsResult, []string{"Word", "Duration", "Attempts"})
 }
 
 func printTable(data [][]string, headers []string) {
