@@ -7,7 +7,7 @@ TODO : write desc
 
 * [x]  Create uppercase mode
 * [x]  Create mixin uppercase/lowercase mode
-* [ ]  Create mode with numbers
+* [x]  Create mode with numbers
 * [ ]  Compute/Detect errors and display a list of characters on which the user should practice
 * [ ]  Create a fire system (based on: rythm, delay between words, time penalty in case of errors...)
 * [ ]  Create a mode with sentences

@@ -12,6 +12,7 @@ import (
 	"math/rand"
 	"os"
 	"os/signal"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -32,16 +33,24 @@ func init() {
 
 	rootCmd.Flags().BoolVarP(&gameConfig.UpperMode, consts.ParamUpperMode, "u", false, "The words will be displayed in uppercase")
 	rootCmd.Flags().BoolVarP(&gameConfig.MixUpperLowerMode, consts.ParamMixUpperLowerMode, "m", false, "The words will be displayed with a mix of character in uppercase and lowercase")
+	rootCmd.Flags().BoolVarP(&gameConfig.NumberMode, consts.ParamNumberMode, "n", false, "The words will be replaced by numbers")
 }
 
 func Execute() {
 	if err := rootCmd.Execute(); err != nil {
-		log.Fatalf("Failed to execute rootCmd: %s", err.Error())
+		fmt.Printf("Failed to execute rootCmd: %s", err.Error())
+		os.Exit(1)
 	}
 }
 
+func displayStart() {
+	fmt.Println(consts.AppTag)
+	gameConfig.Render()
+	fmt.Println("Press 'CTRL+C' to exit the game")
+}
+
 func root(cmd *cobra.Command, args []string) {
-	fmt.Println("CTRL+C to exit the game")
+	displayStart()
 	nbError := 0
 	nbSuccess := 0
 	var events = make([]structs.Event, 0)
@@ -56,19 +65,16 @@ func root(cmd *cobra.Command, args []string) {
 		}
 	}()
 
-	min, max := utils.ComputeBounds(utils.WordSet)
+	gameConfig.WordSetMinLength, gameConfig.WordSetMaxLength = utils.ComputeBounds(utils.WordSet)
 
 	for {
-		x := rand.Intn(max - min) + min
-		words := utils.WordSet[x]
-		y := rand.Intn(len(words))
-
-		expectedText := transformWord(words[y], gameConfig)
+		expectedText := generateWord(gameConfig)
 		reader := bufio.NewReader(os.Stdin)
 
 		doOnce.Do(func() {
-			fmt.Println("Ready? Press any key")
+			fmt.Println("Ready? Press any key to start the game")
 			if _, _, err := reader.ReadRune(); err != nil {
+				fmt.Printf("Failed to start the game: %v\n", err.Error())
 				os.Exit(1)
 			}
 		})
@@ -86,12 +92,28 @@ func root(cmd *cobra.Command, args []string) {
 				nbError++
 			}
 
-			if nbError > 2000000 {
+			// Safety circuit breaker
+			if nbError > consts.SafetyCircuitBreakerLimit {
+				log.Println("An unknown issue occurred. The game has stopped to prevent any other problem")
 				os.Exit(1)
 			}
 		}
 	}
 }
+func generateWord(config structs.GameConfig) string {
+	if config.NumberMode {
+		number := strconv.FormatInt(time.Now().UnixNano(), 10)
+		x := rand.Intn(consts.NumberModeMaxLength) + 1
+		return number[len(number)-x:]
+	}
+
+	x := rand.Intn(config.WordSetMaxLength-config.WordSetMinLength) + config.WordSetMinLength
+	words := utils.WordSet[x]
+	y := rand.Intn(len(words))
+
+	return transformWord(words[y], gameConfig)
+}
+
 func transformWord(word string, config structs.GameConfig) string {
 	if config.UpperMode {
 		word = strings.ToUpper(word)
@@ -137,7 +159,7 @@ func printFinal(nbSuccess int, nbError int, events []structs.Event) {
 func printTable(data [][]string, headers []string) {
 	table := tablewriter.NewWriter(os.Stdout)
 	table.SetHeader(headers)
-	table.SetBorders(tablewriter.Border{Left: true, Top: false, Right: true, Bottom: false})
+	//table.SetBorders(tablewriter.Border{Left: true, Top: false, Right: true, Bottom: false})
 	table.SetCenterSeparator("|")
 	table.AppendBulk(data)
 	table.Render()
