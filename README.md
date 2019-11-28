@@ -42,6 +42,7 @@ Flags:
 * [ ]  Create a mode with symbols
 * [ ]  Create a mode with line codes
 * [ ]  Compute more stats (standard deviation, percentile?)
+* [ ]  Add [asciigraph](github.com/guptarohit/asciigraph) ??
 * [ ]  Compute stats on word length
 * [ ]  Create a mode with a maximum of word (defined length) in x seconds
 * [ ]  Create a mode where the game change the letter during typing. You would have to be careful before pressing Return
