@@ -36,6 +36,7 @@ Flags:
 * [x]  Create uppercase mode
 * [x]  Create mixin uppercase/lowercase mode
 * [x]  Create mode with numbers
+* [ ]  Change the way to catch the user answer, it should be through a key logger or something like this
 * [ ]  Compute/Detect errors and display a list of characters on which the user should practice
 * [ ]  Create a fire system (based on: rythm, delay between words, time penalty in case of errors...)
 * [ ]  Create a mode with sentences
