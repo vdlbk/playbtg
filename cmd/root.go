@@ -144,7 +144,13 @@ func printFinal(nbSuccess int, nbError int, events []structs.Event) {
 	total := int64(0)
 	wordsResult := make([][]string, 0)
 	for _, e := range events {
-		wordsResult = append(wordsResult, []string{e.Word, e.Duration.String(), e.Attempts.String()})
+
+		// Compute avg time by letter
+		duration := int64(e.Duration / time.Millisecond)
+		avg := float64(duration) / float64(len(e.Word))
+		avgDuration := time.Duration(avg) * time.Millisecond
+
+		wordsResult = append(wordsResult, []string{e.Word, e.Duration.String(), avgDuration.String(), e.Attempts.String()})
 		total += e.Duration.Nanoseconds()
 	}
 	avg := total / int64(len(events))
@@ -160,7 +166,7 @@ func printFinal(nbSuccess int, nbError int, events []structs.Event) {
 
 	printTable(data, []string{"", "Result", "%"})
 	fmt.Println()
-	printTable(wordsResult, []string{"Word", "Duration", "Attempts"})
+	printTable(wordsResult, []string{"Word", "Duration", "Duration/letter", "Attempts"})
 }
 
 func printTable(data [][]string, headers []string) {
