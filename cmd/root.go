@@ -3,6 +3,7 @@ package cmd
 import (
 	"bufio"
 	"fmt"
+	"github.com/eiannone/keyboard"
 	"github.com/olekukonko/tablewriter"
 	"github.com/spf13/cobra"
 	"github.com/vdlbk/playbtg/structs"
@@ -46,7 +47,7 @@ func Execute() {
 func displayStart() {
 	fmt.Println(consts.AppTag)
 	gameConfig.Render()
-	fmt.Println("Press 'CTRL+C' to exit the game")
+	fmt.Println("Press 'CTRL+C' or 'ESC' to exit the game")
 }
 
 func root(cmd *cobra.Command, args []string) {
@@ -67,6 +68,13 @@ func root(cmd *cobra.Command, args []string) {
 
 	gameConfig.WordSetMinLength, gameConfig.WordSetMaxLength = utils.ComputeBounds(utils.WordSet)
 
+	if err := keyboard.Open(); err != nil {
+		panic(err)
+	}
+	defer func() {
+		_ = keyboard.Close()
+	}()
+
 	for {
 		expectedText := generateWord(gameConfig)
 		reader := bufio.NewReader(os.Stdin)
@@ -81,16 +89,24 @@ func root(cmd *cobra.Command, args []string) {
 
 		event := structs.Event{Word: expectedText}
 		for {
-			fmt.Printf("Enter [%s]: ", expectedText)
+			fmt.Printf("Enter [%s%s%s]: ", consts.ColorTermYellow, expectedText, consts.ColorTermReset)
 			start := time.Now()
-			text, _ := reader.ReadString('\n')
-			text = strings.Replace(text, "\n", "", -1)
+
+			text, stop := readWord()
+			if stop {
+				c <- os.Interrupt
+				break
+			}
+
+			//text, _ := reader.ReadString('\n')
+			//text = strings.Replace(text, "\n", "", -1)
 			if text == expectedText {
 				event.Duration = time.Since(start)
 				events = append(events, event)
 				nbSuccess++
 				break
 			} else {
+				fmt.Printf("Incorrect [%s%s%s][%s%s%s]\n", consts.ColorTermRed, text, consts.ColorTermReset, consts.ColorTermGreen, expectedText, consts.ColorTermReset)
 				event.Attempts = append(event.Attempts, text)
 				nbError++
 			}
@@ -103,6 +119,37 @@ func root(cmd *cobra.Command, args []string) {
 		}
 	}
 }
+func readWord() (string, bool) {
+	word := ""
+	for {
+		fmt.Println(word)
+		char, key, err := keyboard.GetKey()
+		if err != nil {
+			panic(err)
+		}
+		//fmt.Printf("You pressed: rune %q, key %X\r\n", char, key)
+
+		switch key {
+		case keyboard.KeyEsc, keyboard.KeyCtrlC:
+			fmt.Println("shutdown")
+			return "", true
+		case keyboard.KeyBackspace, keyboard.KeyBackspace2:
+			// TODO: Count deletion
+			fmt.Println("delete")
+			r := []rune(word)
+			word = string(r[:len(r)-1])
+			continue
+		case keyboard.KeySpace, keyboard.KeyEnter:
+			// TODO: finish word and make suggestion
+			return word, false
+		}
+
+		word += string(char)
+	}
+
+	return word, false
+}
+
 func generateWord(config structs.GameConfig) string {
 	if config.NumberMode {
 		number := strconv.FormatInt(time.Now().UnixNano(), 10)

@@ -20,4 +20,10 @@ const (
 	ParamNumberMode        = "number-mode"
 
 	NumberModeMaxLength = 7
+
+	ColorTermRed    = "\033[31m"
+	ColorTermGreen  = "\033[32m"
+	ColorTermYellow = "\033[33m"
+	ColorTermBlue   = "\033[34m"
+	ColorTermReset  = "\033[0m"
 )
