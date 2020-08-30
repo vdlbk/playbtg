@@ -1,7 +1,7 @@
 # Bash typing game
 
 ## What it is ?
-**Bash typing game** is a small game that you can run from your terminal. It challenges you during multiple typing games.
+**Bash typing game** is a small game you can run from your terminal. It challenges you during multiple typing games.
 
 ## Install
 ```bash
@@ -24,11 +24,12 @@ Usage:
   playbtg [flags]
 
 Flags:
-  -h, --help               help for playbtg
-  -n, --number-mode        The words will be replaced by numbers
-  -m, --upper-lower-mode   The words will be displayed with a mix of character in uppercase and lowercase
-  -u, --upper-mode         The words will be displayed in uppercase
-      --version            version for playbtg
+  -h, --help                help for playbtg
+  -i, --infinite-attempts   You have an infinite numbers of attempts for each words (By default, you only have 1 attempt)
+  -n, --number-mode         The words will be replaced by numbers
+  -m, --upper-lower-mode    The words will be displayed with a mix of character in uppercase and lowercase
+  -u, --upper-mode          The words will be displayed in uppercase
+      --version             version for playbtg
 ```
 
 ## Roadmap
@@ -49,3 +50,4 @@ Flags:
 * [ ]  Create a mode where the game change the letter during typing. You would have to be careful before pressing Return
 * [ ]  Save some records
 * [ ]  Add feature to imports his own words
+* [ ]  Add feature to get random wikipedia page

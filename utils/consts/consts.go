@@ -4,20 +4,21 @@ const (
 	GlobalAppName             = "playbtg"
 	SafetyCircuitBreakerLimit = 2000000
 	TagKey                    = "btg"
+	NumberModeMaxLength       = 7
 
 	AppTag = `
-     ____    _____    ____   
-  O | __")o |_ " _|O /"___|O 
-   \|  _ \/   | |  \| |  _ / 
-    | |_) |  /| |\  | |_| |  
-    |____/  o |_| o  \____|  
-   _|| \\_  _// \\_  _)(|_   
-  (__) (__)(__) (__)(__)__)
-	`
+______ _            ______ _____ _____ 
+| ___ \ |           | ___ \_   _|  __ \
+| |_/ / | __ _ _   _| |_/ / | | | |  \/
+|  __/| |/ _' | | | | ___ \ | | | | __
+| |   | | (_| | |_| | |_/ / | | | |_\ \
+\_|   |_|\__,_|\__, \____/  \_/  \____/
+                __/ |
+               |___/
+`
 
 	ParamUpperMode         = "upper-mode"
 	ParamMixUpperLowerMode = "upper-lower-mode"
 	ParamNumberMode        = "number-mode"
-
-	NumberModeMaxLength = 7
+	ParamInfiniteAttempts  = "infinite-attempts"
 )
