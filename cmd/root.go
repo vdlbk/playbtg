@@ -3,13 +3,6 @@ package cmd
 import (
 	"bufio"
 	"fmt"
-	"github.com/eiannone/keyboard"
-	"github.com/olekukonko/tablewriter"
-	"github.com/spf13/cobra"
-	"github.com/vdlbk/playbtg/structs"
-	"github.com/vdlbk/playbtg/utils"
-	"github.com/vdlbk/playbtg/utils/consts"
-	"log"
 	"math/rand"
 	"os"
 	"os/signal"
@@ -17,6 +10,17 @@ import (
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/eiannone/keyboard"
+	"github.com/gosuri/uilive"
+	"github.com/spf13/cobra"
+	"github.com/vdlbk/playbtg/structs"
+	"github.com/vdlbk/playbtg/utils"
+	"github.com/vdlbk/playbtg/utils/consts"
+)
+
+const (
+	DefaultNumberOfWordsGenerated = 50
 )
 
 var rootCmd = &cobra.Command{
@@ -35,6 +39,7 @@ func init() {
 	rootCmd.Flags().BoolVarP(&gameConfig.UpperMode, consts.ParamUpperMode, "u", false, "The words will be displayed in uppercase")
 	rootCmd.Flags().BoolVarP(&gameConfig.MixUpperLowerMode, consts.ParamMixUpperLowerMode, "m", false, "The words will be displayed with a mix of character in uppercase and lowercase")
 	rootCmd.Flags().BoolVarP(&gameConfig.NumberMode, consts.ParamNumberMode, "n", false, "The words will be replaced by numbers")
+	rootCmd.Flags().BoolVarP(&gameConfig.InfiniteAttempts, consts.ParamInfiniteAttempts, "i", false, "You have an infinite numbers of attempts for each words (By default, you only have 1 attempt)")
 }
 
 func Execute() {
@@ -50,33 +55,45 @@ func displayStart() {
 	fmt.Println("Press 'CTRL+C' or 'ESC' to exit the game")
 }
 
-func root(cmd *cobra.Command, args []string) {
+func root(_ *cobra.Command, _ []string) {
 	displayStart()
 	nbError := 0
 	nbSuccess := 0
 	var events = make([]structs.Event, 0)
-	var doOnce sync.Once
 
-	c := make(chan os.Signal, 1)
-	signal.Notify(c, os.Interrupt)
+	// init Writer for instructions
+	writer := uilive.New()
+	writer.Start()
+	defer writer.Stop()
+
+	// init channel to handle signals
+	signals := make(chan os.Signal, 1)
+	signal.Notify(signals, os.Interrupt)
+	signal.Notify(signals, os.Kill)
 	go func() {
-		for range c {
-			printFinal(nbSuccess, nbError, events)
-			os.Exit(0)
+		for range signals {
+			finalStep(nbSuccess, nbError, events)
 		}
 	}()
 
 	gameConfig.WordSetMinLength, gameConfig.WordSetMaxLength = utils.ComputeBounds(utils.WordSet)
 
+	// open keyboard event listener
 	if err := keyboard.Open(); err != nil {
 		panic(err)
 	}
-	defer func() {
-		_ = keyboard.Close()
-	}()
+	defer keyboard.Close()
 
-	for {
-		expectedText := generateWord(gameConfig)
+	runGame(writer, &events, &nbSuccess, &nbError)
+
+	finalStep(nbSuccess, nbError, events)
+}
+
+func runGame(writer *uilive.Writer, events *[]structs.Event, nbSuccess, nbError *int) {
+	var doOnce sync.Once
+	words := generateWords(gameConfig)
+
+	for idx, expectedText := range words {
 		reader := bufio.NewReader(os.Stdin)
 
 		doOnce.Do(func() {
@@ -87,67 +104,82 @@ func root(cmd *cobra.Command, args []string) {
 			}
 		})
 
-		event := structs.Event{Word: expectedText}
-		for {
-			fmt.Printf("Enter [%s%s%s]: ", consts.ColorTermYellow, expectedText, consts.ColorTermReset)
-			start := time.Now()
+		end := idx + 5
+		if end >= len(words) {
+			end = len(words)
+		}
 
-			text, stop := readWord()
+		event := structs.Event{Word: expectedText}
+		start := time.Now()
+		fmt.Fprintf(writer, "%s %s\n", utils.PrintYellow(expectedText), strings.Join(words[idx+1:end], " "))
+		for {
+			text, stop := readWord(&event)
 			if stop {
-				c <- os.Interrupt
-				break
+				return
 			}
 
-			//text, _ := reader.ReadString('\n')
-			//text = strings.Replace(text, "\n", "", -1)
+			// compare user input with expected text
 			if text == expectedText {
 				event.Duration = time.Since(start)
-				events = append(events, event)
-				nbSuccess++
+				*events = append(*events, event)
+				*nbSuccess++
 				break
 			} else {
-				fmt.Printf("Incorrect [%s%s%s][%s%s%s]\n", consts.ColorTermRed, text, consts.ColorTermReset, consts.ColorTermGreen, expectedText, consts.ColorTermReset)
+				fmt.Fprintf(writer, "%s\n", utils.PrintRed(text))
 				event.Attempts = append(event.Attempts, text)
-				nbError++
+				*nbError++
+				if !gameConfig.InfiniteAttempts {
+					event.Duration = time.Since(start)
+					*events = append(*events, event)
+					break
+				}
 			}
 
 			// Safety circuit breaker
-			if nbError > consts.SafetyCircuitBreakerLimit {
-				log.Println("An unknown issue occurred. The game has stopped to prevent any other problem")
+			if *nbError > consts.SafetyCircuitBreakerLimit {
+				fmt.Println("An unknown issue occurred. The game has stopped to prevent any other problem")
 				os.Exit(1)
 			}
 		}
 	}
 }
-func readWord() (string, bool) {
+
+func finalStep(nbSuccess int, nbError int, events []structs.Event) {
+	printResults(nbSuccess, nbError, events)
+	os.Exit(0)
+}
+
+func readWord(event *structs.Event) (string, bool) {
+	writer := uilive.New()
+	writer.Start()
+	defer writer.Flush()
 	word := ""
 	for {
-		fmt.Println(word)
+		fmt.Fprintf(writer, "%s\n", word)
 		char, key, err := keyboard.GetKey()
 		if err != nil {
-			panic(err)
+			fmt.Println(err)
+			return "", true
 		}
 		//fmt.Printf("You pressed: rune %q, key %X\r\n", char, key)
 
 		switch key {
 		case keyboard.KeyEsc, keyboard.KeyCtrlC:
-			fmt.Println("shutdown")
+			fmt.Println("exiting...")
 			return "", true
 		case keyboard.KeyBackspace, keyboard.KeyBackspace2:
-			// TODO: Count deletion
-			fmt.Println("delete")
-			r := []rune(word)
-			word = string(r[:len(r)-1])
+			if len(word) > 0 {
+				r := []rune(word)
+				word = string(r[:len(r)-1])
+				event.Deletion++
+			}
 			continue
 		case keyboard.KeySpace, keyboard.KeyEnter:
-			// TODO: finish word and make suggestion
 			return word, false
 		}
 
 		word += string(char)
 	}
-
-	return word, false
 }
 
 func generateWord(config structs.GameConfig) string {
@@ -162,6 +194,14 @@ func generateWord(config structs.GameConfig) string {
 	y := rand.Intn(len(words))
 
 	return transformWord(words[y], gameConfig)
+}
+
+func generateWords(config structs.GameConfig) []string {
+	var words []string
+	for i := 0; i < DefaultNumberOfWordsGenerated; i++ {
+		words = append(words, generateWord(config))
+	}
+	return words
 }
 
 func transformWord(word string, config structs.GameConfig) string {
@@ -181,46 +221,47 @@ func transformWord(word string, config structs.GameConfig) string {
 	return word
 }
 
-func printFinal(nbSuccess int, nbError int, events []structs.Event) {
+func printResults(nbSuccess int, nbError int, events []structs.Event) {
 	fmt.Println()
 	if len(events) == 0 {
+		fmt.Println("no entry")
 		return
 	}
 
-	var result = float64(nbSuccess) / float64(nbSuccess+nbError) * 100
-	total := int64(0)
+	var percentageOfSuccess = float64(nbSuccess) / float64(nbSuccess+nbError) * 100
+	totalDuration := time.Duration(0)
+	totalDurationPerLetter := time.Duration(0)
 	wordsResult := make([][]string, 0)
-	for _, e := range events {
+	deletions := 0
+	for _, event := range events {
 
 		// Compute avg time by letter
-		duration := int64(e.Duration / time.Millisecond)
-		avg := float64(duration) / float64(len(e.Word))
-		avgDuration := time.Duration(avg) * time.Millisecond
+		avgPerLetter := float64(event.Duration) / float64(len(event.Word))
+		avgDuration := time.Duration(avgPerLetter)
+		wordsResult = append(wordsResult, []string{event.Word, event.Duration.String(), avgDuration.String(), event.Attempts.String(), strconv.Itoa(event.Deletion)})
 
-		wordsResult = append(wordsResult, []string{e.Word, e.Duration.String(), avgDuration.String(), e.Attempts.String()})
-		total += e.Duration.Nanoseconds()
+		totalDuration += event.Duration
+		totalDurationPerLetter += avgDuration
+		deletions += event.Deletion
 	}
-	avg := total / int64(len(events))
-	tref := time.Unix(0, avg)
-	dref := tref.Sub(time.Unix(0, 0))
-	wordsResult = append(wordsResult, []string{"Average", dref.String(), ""})
+	avgDuration := totalDuration.Nanoseconds() / int64(len(events))
+	totalAVGPerLetter := totalDurationPerLetter.Nanoseconds() / int64(len(events))
+	dAVGDuration := time.Unix(0, avgDuration).Sub(time.Unix(0, 0))
+	dTotalAVGPerLetter := time.Unix(0, totalAVGPerLetter).Sub(time.Unix(0, 0))
+	totalTimeDuration := time.Unix(0, totalDuration.Nanoseconds()).Sub(time.Unix(0, 0))
+	wpm := float64(len(events)) / totalDuration.Minutes()
+	wordsResult = append(wordsResult, []string{" ", " ", " ", " ", " "})
+	wordsResult = append(wordsResult, []string{"Total", totalTimeDuration.String(), "", "", strconv.Itoa(deletions)})
+	wordsResult = append(wordsResult, []string{"Average", dAVGDuration.String(), dTotalAVGPerLetter.String(), "", fmt.Sprintf("%.2f", float64(deletions)/float64(len(events)))})
+	wordsResult = append(wordsResult, []string{"WPM", fmt.Sprintf("%.2f", wpm), "", "", ""})
 
-	data := [][]string{
-		{"Success", fmt.Sprintf("%d", nbSuccess), fmt.Sprintf("%.2f", result)},
-		{"Error", fmt.Sprintf("%d", nbError), fmt.Sprintf("%.2f", 100-result)},
-		{"Total", fmt.Sprintf("%d", nbSuccess+nbError), "100.00%"},
+	resultData := [][]string{
+		{"Success", strconv.Itoa(nbSuccess), fmt.Sprintf("%.2f%s", percentageOfSuccess, "%")},
+		{"Error", strconv.Itoa(nbError), fmt.Sprintf("%.2f%s", 100-percentageOfSuccess, "%")},
+		{"Total", strconv.Itoa(nbSuccess + nbError), "100.00%"},
 	}
 
-	printTable(data, []string{"", "Result", "%"})
+	utils.PrintTable(resultData, []string{"", "Result", "%"})
 	fmt.Println()
-	printTable(wordsResult, []string{"Word", "Duration", "Duration/letter", "Attempts"})
-}
-
-func printTable(data [][]string, headers []string) {
-	table := tablewriter.NewWriter(os.Stdout)
-	table.SetHeader(headers)
-	//table.SetBorders(tablewriter.Border{Left: true, Top: false, Right: true, Bottom: false})
-	table.SetCenterSeparator("|")
-	table.AppendBulk(data)
-	table.Render()
+	utils.PrintTable(wordsResult, []string{"Word", "Duration", "Duration/letter", "Errors", "Backspace"})
 }

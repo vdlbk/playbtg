@@ -10,6 +10,7 @@ type Event struct {
 	Word     string
 	Duration time.Duration
 	Attempts Attempts
+	Deletion int
 }
 
 func (e *Event) String() string {
