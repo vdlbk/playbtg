@@ -6,6 +6,7 @@ import (
 	"math/rand"
 	"os"
 	"os/signal"
+	"sort"
 	"strconv"
 	"strings"
 	"sync"
@@ -124,7 +125,9 @@ func runGame(writer *uilive.Writer, events *[]structs.Event, nbSuccess, nbError 
 				*nbSuccess++
 				break
 			} else {
-				fmt.Fprintf(writer, "%s\n", utils.PrintRed(text))
+				if len(text) > 0 && text[0] != ' ' {
+					fmt.Fprintf(writer, "%s\n", utils.PrintRed(text))
+				}
 				event.Attempts = append(event.Attempts, text)
 				*nbError++
 				if !gameConfig.InfiniteAttempts {
@@ -156,14 +159,16 @@ func readWord(event *structs.Event) (string, bool) {
 	writer.Start()
 	defer writer.Flush()
 	word := ""
-	for {
+	// Remove +1 if you want to create a mode without having to use space or enter between words
+	for len(word) < len(event.Word)+1 {
 		fmt.Fprintf(writer, "%s\n", word)
+		//fmt.Println(word)
 		char, key, err := keyboard.GetKey()
 		if err != nil {
 			fmt.Println(err)
 			return "", true
 		}
-		//fmt.Printf("You pressed: rune %q, key %X\r\n", char, key)
+		//fmt.Printf("You pressed: rune %q, key %X. cursor %d\r\n", char, key, cursor)
 
 		switch key {
 		case keyboard.KeyEsc, keyboard.KeyCtrlC:
@@ -182,6 +187,7 @@ func readWord(event *structs.Event) (string, bool) {
 
 		word += string(char)
 	}
+	return word, false
 }
 
 func generateWord(config structs.GameConfig) string {
@@ -235,7 +241,9 @@ func printResults(nbSuccess int, nbError int, events []structs.Event) {
 	totalDurationPerLetter := time.Duration(0)
 	wordsResult := make([][]string, 0)
 	deletions := 0
+	charsToReview := make(structs.AnalysisMap)
 	for _, event := range events {
+		event.AnalyzeAttempts(&charsToReview)
 
 		// Compute avg time by letter
 		avgPerLetter := float64(event.Duration) / float64(len(event.Word))
@@ -266,4 +274,17 @@ func printResults(nbSuccess int, nbError int, events []structs.Event) {
 	utils.PrintTable(resultData, []string{"", "Result", "%"})
 	fmt.Println()
 	utils.PrintTable(wordsResult, []string{"Word", "Duration", "Duration/letter", "Errors", "Backspace"})
+	fmt.Println()
+
+	if len(charsToReview) > 0 {
+		charSwaps := charsToReview.ToCharSwaps()
+		sort.Sort(charSwaps)
+		var charSwapsResult [][]string
+		for _, c := range charSwaps {
+			charSwapsResult = append(charSwapsResult, c.ToStrings())
+		}
+
+		fmt.Println("Here's the chars you may want to practice")
+		utils.PrintTable(charSwapsResult, []string{"Expected char", "Input", "Number"})
+	}
 }
