@@ -42,7 +42,7 @@ Flags:
 * [x]  Create mixin uppercase/lowercase mode
 * [x]  Create mode with numbers
 * [x]  Change the way to catch the user answer, it should be through a key logger or something like this
-* [ ]  Compute/Detect errors and display a list of characters on which the user should practice
+* [x]  Compute/Detect errors and display a list of characters on which the user should practice
 * [ ]  Create a fire system (based on: rythm, delay between words, time penalty in case of errors...)
 * [ ]  Create a mode with sentences
 * [ ]  Create a mode with symbols
@@ -56,3 +56,7 @@ Flags:
 * [ ]  Add a feature to import his own words
 * [ ]  Add a feature to get random wikipedia page
 * [ ]  Add an option to choose the output (console or file)
+* [ ]  Add an option to disable space key/ return key between words
+
+## Issues
+* [ ]  Stats are not very accurate when this user entered an error (*e.g. spam on space key*)
