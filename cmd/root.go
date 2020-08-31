@@ -192,7 +192,7 @@ func readWord(event *structs.Event) (string, bool) {
 
 func generateWord(config structs.GameConfig) string {
 	if config.NumberMode {
-		number := strconv.FormatInt(time.Now().UnixNano(), 10)
+		number := strconv.FormatInt(rand.Int63(), 10)
 		x := rand.Intn(consts.NumberModeMaxLength) + 1
 		return number[len(number)-x:]
 	}
