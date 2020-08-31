@@ -161,7 +161,14 @@ func readWord(event *structs.Event) (string, bool) {
 	word := ""
 	// Remove +1 if you want to create a mode without having to use space or enter between words
 	for len(word) < len(event.Word)+1 {
-		fmt.Fprintf(writer, "%s\n", word)
+		if event.Word == word {
+			fmt.Fprintf(writer, "%s\n", utils.PrintBlue(word))
+		} else if strings.HasPrefix(event.Word, word) {
+			fmt.Fprintf(writer, "%s\n", word)
+		} else {
+			fmt.Fprintf(writer, "%s\n", utils.PrintRed(word))
+		}
+
 		//fmt.Println(word)
 		char, key, err := keyboard.GetKey()
 		if err != nil {

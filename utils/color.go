@@ -20,6 +20,14 @@ func PrintRed(text string) string {
 	return PrintColor(text, ColorTermRed)
 }
 
+func PrintGreen(text string) string {
+	return PrintColor(text, ColorTermGreen)
+}
+
+func PrintBlue(text string) string {
+	return PrintColor(text, ColorTermBlue)
+}
+
 func PrintColor(text, color string) string {
 	return fmt.Sprintf("%s%s%s", color, text, ColorTermReset)
 }
