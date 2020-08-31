@@ -51,7 +51,8 @@ Flags:
 * [ ]  Add [asciigraph](github.com/guptarohit/asciigraph) ??
 * [ ]  Compute stats on word length
 * [ ]  Create a mode with a maximum of word (defined length) in x seconds
-* [ ]  Create a mode where the game change the letter during typing. You would have to be careful before pressing Return
+* [ ]  Create a chaos mode which sometimes change the letter you typed randomly
 * [ ]  Save some records
 * [ ]  Add a feature to import his own words
 * [ ]  Add a feature to get random wikipedia page
+* [ ]  Add an option to choose the output (console or file)
