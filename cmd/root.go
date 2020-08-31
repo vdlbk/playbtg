@@ -21,6 +21,7 @@ import (
 
 const (
 	DefaultNumberOfWordsGenerated = 50
+	NumberOfWordsDisplayed        = 10
 )
 
 var rootCmd = &cobra.Command{
@@ -82,8 +83,6 @@ func root(_ *cobra.Command, _ []string) {
 	if err := keyboard.Open(); err != nil {
 		panic(err)
 	}
-	defer keyboard.Close()
-
 	runGame(writer, &events, &nbSuccess, &nbError)
 
 	finalStep(nbSuccess, nbError, events)
@@ -104,7 +103,7 @@ func runGame(writer *uilive.Writer, events *[]structs.Event, nbSuccess, nbError 
 			}
 		})
 
-		end := idx + 5
+		end := idx + NumberOfWordsDisplayed
 		if end >= len(words) {
 			end = len(words)
 		}
@@ -145,6 +144,9 @@ func runGame(writer *uilive.Writer, events *[]structs.Event, nbSuccess, nbError 
 }
 
 func finalStep(nbSuccess int, nbError int, events []structs.Event) {
+	if err := keyboard.Close(); err != nil {
+		fmt.Println(err)
+	}
 	printResults(nbSuccess, nbError, events)
 	os.Exit(0)
 }
