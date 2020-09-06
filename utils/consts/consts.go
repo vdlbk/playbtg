@@ -21,4 +21,5 @@ ______ _            ______ _____ _____
 	ParamMixUpperLowerMode = "upper-lower-mode"
 	ParamNumberMode        = "number-mode"
 	ParamInfiniteAttempts  = "infinite-attempts"
+	ParamOutput            = "output"
 )

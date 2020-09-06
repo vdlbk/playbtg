@@ -3,6 +3,7 @@ package cmd
 import (
 	"bufio"
 	"fmt"
+	"io"
 	"math/rand"
 	"os"
 	"os/signal"
@@ -15,6 +16,7 @@ import (
 	"github.com/eiannone/keyboard"
 	"github.com/gosuri/uilive"
 	"github.com/spf13/cobra"
+	"github.com/vdlbk/playbtg/renderers"
 	"github.com/vdlbk/playbtg/structs"
 	"github.com/vdlbk/playbtg/utils"
 	"github.com/vdlbk/playbtg/utils/consts"
@@ -23,6 +25,7 @@ import (
 const (
 	DefaultNumberOfWordsGenerated = 50
 	NumberOfWordsDisplayed        = 10
+	DefaultOutput                 = "Console"
 )
 
 var rootCmd = &cobra.Command{
@@ -42,11 +45,25 @@ func init() {
 	rootCmd.Flags().BoolVarP(&gameConfig.MixUpperLowerMode, consts.ParamMixUpperLowerMode, "m", false, "The words will be displayed with a mix of character in uppercase and lowercase")
 	rootCmd.Flags().BoolVarP(&gameConfig.NumberMode, consts.ParamNumberMode, "n", false, "The words will be replaced by numbers")
 	rootCmd.Flags().BoolVarP(&gameConfig.InfiniteAttempts, consts.ParamInfiniteAttempts, "i", false, "You have an infinite numbers of attempts for each words (By default, you only have 1 attempt)")
+	rootCmd.Flags().StringVarP(&gameConfig.Output, consts.ParamOutput, "o", DefaultOutput, "Specify the folder in which it will create a save the result into a file")
+}
+
+func checkConfig(gameConfig structs.GameConfig) error {
+	if gameConfig.Output != DefaultOutput {
+		fileInfo, err := os.Stat(gameConfig.Output)
+		if err != nil {
+			return err
+		}
+		if !fileInfo.IsDir() {
+			return fmt.Errorf("%s is not a valid folder path", gameConfig.Output)
+		}
+	}
+	return nil
 }
 
 func Execute() {
 	if err := rootCmd.Execute(); err != nil {
-		fmt.Printf("Failed to execute rootCmd: %s", err.Error())
+		fmt.Printf("Failed to execute %s: %s", consts.GlobalAppName, err.Error())
 		os.Exit(1)
 	}
 }
@@ -58,6 +75,11 @@ func displayStart() {
 }
 
 func root(_ *cobra.Command, _ []string) {
+	if err := checkConfig(gameConfig); err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+
 	displayStart()
 	nbError := 0
 	nbSuccess := 0
@@ -237,7 +259,19 @@ func transformWord(word string, config structs.GameConfig) string {
 }
 
 func printResults(nbSuccess int, nbError int, events []structs.Event) {
-	fmt.Println()
+	var writer io.Writer = os.Stdout
+	var renderer renderers.Renderer = &renderers.TextRenderer{
+		Writer: writer,
+	}
+
+	if gameConfig.Output != DefaultOutput {
+		writer, fileName := renderers.InitFile(gameConfig.Output)
+		renderer = &renderers.MarkdownRenderer{
+			Writer:   writer,
+			FileName: fileName,
+		}
+	}
+	renderer.RenderEmptyLines(1)
 	if len(events) == 0 {
 		fmt.Println("no entry")
 		return
@@ -278,10 +312,13 @@ func printResults(nbSuccess int, nbError int, events []structs.Event) {
 		{"Total", strconv.Itoa(nbSuccess + nbError), "100.00%"},
 	}
 
-	utils.PrintTable(resultData, []string{"", "Result", "%"})
-	fmt.Println()
-	utils.PrintTable(wordsResult, []string{"Word", "Duration", "Duration/letter", "Errors", "Backspace"})
-	fmt.Println()
+	renderer.RenderTitle(1, "Results")
+	renderer.RenderTitle(2, "Main stats")
+	renderer.RenderTable(resultData, []string{"", "Result", "%"})
+	renderer.RenderEmptyLines(1)
+	renderer.RenderTitle(2, "Words stats")
+	renderer.RenderTable(wordsResult, []string{"Word", "Duration", "Duration/letter", "Errors", "Backspace"})
+	renderer.RenderEmptyLines(1)
 
 	if len(charsToReview) > 0 {
 		charSwaps := charsToReview.ToCharSwaps()
@@ -291,7 +328,8 @@ func printResults(nbSuccess int, nbError int, events []structs.Event) {
 			charSwapsResult = append(charSwapsResult, c.ToStrings())
 		}
 
-		fmt.Println("Here's the chars you may want to practice")
-		utils.PrintTable(charSwapsResult, []string{"Expected char", "Input", "Number"})
+		renderer.RenderTitle(2, "Chars errors")
+		renderer.RenderTable(charSwapsResult, []string{"Expected char", "Input", "Number"})
+		renderer.RenderEmptyLines(1)
 	}
 }
