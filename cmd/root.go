@@ -32,7 +32,7 @@ const (
 var rootCmd = &cobra.Command{
 	Use:              consts.GlobalAppName,
 	Short:            consts.GlobalAppName,
-	Version:          "v0.4.0",
+	Version:          "v0.4.1",
 	TraverseChildren: true,
 	Run:              root,
 }
@@ -49,7 +49,7 @@ func init() {
 	rootCmd.Flags().BoolVarP(&gameConfig.NumberMode, consts.ParamNumberMode, "n", false, "The words will be replaced by numbers")
 	rootCmd.Flags().BoolVarP(&gameConfig.InfiniteAttempts, consts.ParamInfiniteAttempts, "i", false, "You have an infinite numbers of attempts for each words (By default, you only have 1 attempt)")
 	rootCmd.Flags().StringVarP(&gameConfig.Output, consts.ParamOutput, "o", DefaultOutput, "Specify the folder in which it will save the results into a file")
-	rootCmd.Flags().BoolVarP(&gameConfig.NoSpaceMode, consts.ParamNoSpaceMode, "s", false, "Disable space between keys")
+	rootCmd.Flags().BoolVarP(&gameConfig.NoSpaceMode, consts.ParamNoSpaceMode, "s", false, "Disable space between words")
 }
 
 func checkConfig(gameConfig structs.GameConfig) error {
