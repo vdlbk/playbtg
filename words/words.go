@@ -1,4 +1,4 @@
-package utils
+package words
 
 var (
 	WordSet = map[int][]string{

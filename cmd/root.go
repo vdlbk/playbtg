@@ -20,6 +20,7 @@ import (
 	"github.com/vdlbk/playbtg/structs"
 	"github.com/vdlbk/playbtg/utils"
 	"github.com/vdlbk/playbtg/utils/consts"
+	"github.com/vdlbk/playbtg/words"
 )
 
 const (
@@ -100,7 +101,7 @@ func root(_ *cobra.Command, _ []string) {
 		}
 	}()
 
-	gameConfig.WordSetMinLength, gameConfig.WordSetMaxLength = utils.ComputeBounds(utils.WordSet)
+	gameConfig.WordSetMinLength, gameConfig.WordSetMaxLength = utils.ComputeBounds(words.WordSet)
 
 	// open keyboard event listener
 	if err := keyboard.Open(); err != nil {
@@ -227,7 +228,7 @@ func generateWord(config structs.GameConfig) string {
 	}
 
 	x := rand.Intn(config.WordSetMaxLength-config.WordSetMinLength) + config.WordSetMinLength
-	words := utils.WordSet[x]
+	words := words.WordSet[x]
 	y := rand.Intn(len(words))
 
 	return transformWord(words[y], gameConfig)
