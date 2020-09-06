@@ -31,7 +31,7 @@ const (
 var rootCmd = &cobra.Command{
 	Use:              consts.GlobalAppName,
 	Short:            consts.GlobalAppName,
-	Version:          "v0.2.1",
+	Version:          "v0.3.0",
 	TraverseChildren: true,
 	Run:              root,
 }
