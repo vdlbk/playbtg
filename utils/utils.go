@@ -1,6 +1,8 @@
 package utils
 
 import (
+	"fmt"
+	"io"
 	"math/rand"
 	"time"
 )
@@ -25,4 +27,13 @@ func ComputeBounds(set map[int][]string) (int, int) {
 
 func FiftyFifty() bool {
 	return rand.Float64() >= 0.5
+}
+
+func PrintEmptyLines(n int, writer io.Writer) {
+	for i := 0; i < n; i++ {
+		if _, err := fmt.Fprintln(writer); err != nil {
+			fmt.Println(err)
+			break
+		}
+	}
 }

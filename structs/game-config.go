@@ -3,6 +3,7 @@ package structs
 import (
 	"encoding/json"
 	"fmt"
+	"os"
 	"reflect"
 
 	"github.com/vdlbk/playbtg/utils"
@@ -11,12 +12,13 @@ import (
 )
 
 type GameConfig struct {
-	UpperMode         bool `json:"upper-mode" btg:"Upper mode"`
-	MixUpperLowerMode bool `json:"upper-lower-mode" btg:"Mixin Upper/Lower mode"`
-	NumberMode        bool `json:"number-mode" btg:"Number mode"`
-	InfiniteAttempts  bool `json:"infinite-attempts" btg:"Infinite attempts"`
-	WordSetMinLength  int  `json:"-" btg:"-"`
-	WordSetMaxLength  int  `json:"-" btg:"-"`
+	UpperMode         bool   `json:"upper-mode" btg:"Upper mode"`
+	MixUpperLowerMode bool   `json:"upper-lower-mode" btg:"Mixin Upper/Lower mode"`
+	NumberMode        bool   `json:"number-mode" btg:"Number mode"`
+	InfiniteAttempts  bool   `json:"infinite-attempts" btg:"Infinite attempts"`
+	Output            string `json:"output" btg:"Output"`
+	WordSetMinLength  int    `json:"-" btg:"-"`
+	WordSetMaxLength  int    `json:"-" btg:"-"`
 }
 
 func (g GameConfig) Render() {
@@ -29,7 +31,7 @@ func (g GameConfig) Render() {
 		}
 	}
 
-	utils.PrintTable(config, []string{"Mode", "value"})
+	utils.PrintTable(os.Stdout, config, []string{"Mode", "value"}, false)
 }
 
 func (g GameConfig) String() string {
