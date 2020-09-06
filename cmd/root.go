@@ -24,7 +24,7 @@ import (
 )
 
 const (
-	DefaultNumberOfWordsGenerated = 50
+	DefaultNumberOfWordsGenerated = 60
 	NumberOfWordsDisplayed        = 10
 	DefaultOutput                 = "Console"
 )
@@ -75,7 +75,11 @@ func Execute() {
 func displayStart() {
 	fmt.Println(consts.AppTag)
 	gameConfig.Render()
+	fmt.Println()
 	fmt.Println("Press 'CTRL+C' or 'ESC' to exit the game")
+	if !gameConfig.NoSpaceMode {
+		fmt.Println("Press 'SPACE' or 'ENTER' to go to the next word")
+	}
 }
 
 func root(_ *cobra.Command, _ []string) {
@@ -220,6 +224,9 @@ func readWord(event *structs.Event) (string, bool) {
 			}
 			continue
 		case keyboard.KeySpace, keyboard.KeyEnter:
+			if gameConfig.NoSpaceMode {
+				continue
+			}
 			return word, false
 		}
 

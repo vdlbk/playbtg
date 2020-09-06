@@ -3,7 +3,7 @@
 ## What it is ?
 **Bash typing game** is a small game you can run from your terminal. It challenges you during multiple typing games.
 
-The default mode gives you 50 words you have to enter correctly. More mode and customization are incoming.
+The default mode gives you 60 words you have to enter correctly. More mode and customization are incoming.
 
 ## Install / Update
 ```bash
