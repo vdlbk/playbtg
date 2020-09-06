@@ -31,7 +31,7 @@ Flags:
   -h, --help                help for playbtg
   -i, --infinite-attempts   You have an infinite numbers of attempts for each words (By default, you only have 1 attempt)
   -n, --number-mode         The words will be replaced by numbers
-  -o, --output string       Specify the folder in which it will create a save the result into a file (default "Console")
+  -o, --output string       Specify the folder in which it will save the results into a file (default "Console")
   -m, --upper-lower-mode    The words will be displayed with a mix of character in uppercase and lowercase
   -u, --upper-mode          The words will be displayed in uppercase
   -v, --version             version for playbtg
