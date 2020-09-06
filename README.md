@@ -30,6 +30,7 @@ Usage:
 Flags:
   -h, --help                help for playbtg
   -i, --infinite-attempts   You have an infinite numbers of attempts for each words (By default, you only have 1 attempt)
+  -s, --no-space-mode       Disable space between keys
   -n, --number-mode         The words will be replaced by numbers
   -o, --output string       Specify the folder in which it will save the results into a file (default "Console")
   -m, --upper-lower-mode    The words will be displayed with a mix of character in uppercase and lowercase
@@ -57,7 +58,7 @@ Flags:
 * [ ]  Add a feature to import his own words
 * [ ]  Add a feature to get random wikipedia page
 * [x]  Add an option to choose the output (console or file)
-* [ ]  Add an option to disable space key/ return key between words
+* [x]  Add an option to disable space key/ return key between words
 
 ## Issues
 * [ ]  Stats are not very accurate when this user entered an error (*e.g. spam on space key*)

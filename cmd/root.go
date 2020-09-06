@@ -37,7 +37,9 @@ var rootCmd = &cobra.Command{
 	Run:              root,
 }
 
-var gameConfig = structs.GameConfig{}
+var (
+	gameConfig = structs.GameConfig{}
+)
 
 func init() {
 	rand.Seed(time.Now().UnixNano())
@@ -47,6 +49,7 @@ func init() {
 	rootCmd.Flags().BoolVarP(&gameConfig.NumberMode, consts.ParamNumberMode, "n", false, "The words will be replaced by numbers")
 	rootCmd.Flags().BoolVarP(&gameConfig.InfiniteAttempts, consts.ParamInfiniteAttempts, "i", false, "You have an infinite numbers of attempts for each words (By default, you only have 1 attempt)")
 	rootCmd.Flags().StringVarP(&gameConfig.Output, consts.ParamOutput, "o", DefaultOutput, "Specify the folder in which it will save the results into a file")
+	rootCmd.Flags().BoolVarP(&gameConfig.NoSpaceMode, consts.ParamNoSpaceMode, "s", false, "Disable space between keys")
 }
 
 func checkConfig(gameConfig structs.GameConfig) error {
@@ -182,8 +185,13 @@ func readWord(event *structs.Event) (string, bool) {
 	writer.Start()
 	defer writer.Flush()
 	word := ""
-	// Remove +1 if you want to create a mode without having to use space or enter between words
-	for len(word) < len(event.Word)+1 {
+
+	deltaAfterUserInput := 1
+	if gameConfig.NoSpaceMode {
+		deltaAfterUserInput = 0
+	}
+
+	for len(word) < len(event.Word)+deltaAfterUserInput {
 		if event.Word == word {
 			fmt.Fprintf(writer, "%s\n", utils.PrintBlue(word))
 		} else if strings.HasPrefix(event.Word, word) {

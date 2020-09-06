@@ -20,6 +20,7 @@ ______ _            ______ _____ _____
 	ParamUpperMode         = "upper-mode"
 	ParamMixUpperLowerMode = "upper-lower-mode"
 	ParamNumberMode        = "number-mode"
+	ParamNoSpaceMode       = "no-space-mode"
 	ParamInfiniteAttempts  = "infinite-attempts"
 	ParamOutput            = "output"
 )
