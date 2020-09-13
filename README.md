@@ -41,6 +41,22 @@ Flags:
   -v, --version             version for playbtg
 ```
 
+### Use custom words
+You can use your very own list of words by running the binary with a valid path to any kind of file which contains text.
+Here's a short example :
+```bash
+playbtg /folder/my_file.txt
+```
+
+Where `/folder/my_file.txt` may looks like:
+```txt
+fire magma electricity
+water ice steam
+earth metal rock
+wind tornado
+Science B*tch!
+```
+
 ## Roadmap
 
 * [x]  Create uppercase mode
