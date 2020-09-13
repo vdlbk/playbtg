@@ -25,7 +25,10 @@ playbtg --help
 playbtg
 
 Usage:
-  playbtg [flags]
+  playbtg <file> [flags]
+
+Examples:
+playbtg my_file.txt -i --output=/tmp/result
 
 Flags:
   -h, --help                help for playbtg
@@ -55,7 +58,7 @@ Flags:
 * [ ]  Create a mode with a maximum of word (defined length) in x seconds
 * [ ]  Create a chaos mode which sometimes change the letter you typed randomly
 * [ ]  Save some records
-* [ ]  Add a feature to import his own words
+* [x]  Add a feature to import his own words
 * [ ]  Add a feature to get random wikipedia page
 * [x]  Add an option to choose the output (console or file)
 * [x]  Add an option to disable space key/ return key between words

@@ -30,11 +30,12 @@ const (
 )
 
 var rootCmd = &cobra.Command{
-	Use:              consts.GlobalAppName,
+	Use:              consts.GlobalAppName + " <file>",
 	Short:            consts.GlobalAppName,
 	Version:          "v0.4.1",
 	TraverseChildren: true,
 	Run:              root,
+	Example:          consts.GlobalAppName + " my_file.txt -i --output=/tmp/result",
 }
 
 var (
@@ -82,7 +83,7 @@ func displayStart() {
 	}
 }
 
-func root(_ *cobra.Command, _ []string) {
+func root(_ *cobra.Command, args []string) {
 	if err := checkConfig(gameConfig); err != nil {
 		fmt.Println(err)
 		os.Exit(1)
@@ -108,20 +109,30 @@ func root(_ *cobra.Command, _ []string) {
 		}
 	}()
 
-	gameConfig.WordSetMinLength, gameConfig.WordSetMaxLength = utils.ComputeBounds(words.WordSet)
+	var data []string
+	if len(args) > 0 {
+		d, err := utils.ReadFromFile(args[0])
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+		data = d
+	} else {
+		gameConfig.WordSetMinLength, gameConfig.WordSetMaxLength = utils.ComputeBounds(words.WordSet)
+		data = generateWords(gameConfig)
+	}
 
 	// open keyboard event listener
 	if err := keyboard.Open(); err != nil {
 		panic(err)
 	}
-	runGame(writer, &events, &nbSuccess, &nbError)
+	runGame(writer, data, &events, &nbSuccess, &nbError)
 
 	finalStep(nbSuccess, nbError, events)
 }
 
-func runGame(writer *uilive.Writer, events *[]structs.Event, nbSuccess, nbError *int) {
+func runGame(writer *uilive.Writer, words []string, events *[]structs.Event, nbSuccess, nbError *int) {
 	var doOnce sync.Once
-	words := generateWords(gameConfig)
 
 	for idx, expectedText := range words {
 		reader := bufio.NewReader(os.Stdin)
