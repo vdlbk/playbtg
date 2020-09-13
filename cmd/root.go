@@ -32,7 +32,7 @@ const (
 var rootCmd = &cobra.Command{
 	Use:              consts.GlobalAppName + " <file>",
 	Short:            consts.GlobalAppName,
-	Version:          "v0.4.1",
+	Version:          "v0.5.0",
 	TraverseChildren: true,
 	Run:              root,
 	Example:          consts.GlobalAppName + " my_file.txt -i --output=/tmp/result",
