@@ -12,6 +12,7 @@ type Event struct {
 	Duration time.Duration
 	Attempts Attempts
 	Deletion int
+	Errors   int
 }
 
 func (e *Event) String() string {
@@ -21,7 +22,14 @@ func (e *Event) String() string {
 type Attempts []string
 
 func (a Attempts) String() string {
-	return strings.Join(a, " ")
+	tmp := make([]string, len(a))
+	copy(tmp, a)
+	for idx, text := range a {
+		if text == "" || text == " " {
+			tmp[idx] = "<SPACE>"
+		}
+	}
+	return strings.Join(tmp, " ")
 }
 
 func (e *Event) AnalyzeAttempts(result *AnalysisMap) {

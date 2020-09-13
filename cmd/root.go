@@ -170,6 +170,7 @@ func runGame(writer *uilive.Writer, words []string, events *[]structs.Event, nbS
 					fmt.Fprintf(writer, "%s\n", utils.PrintRed(text))
 				}
 				event.Attempts = append(event.Attempts, text)
+				event.Errors++
 				*nbError++
 				if !gameConfig.InfiniteAttempts {
 					event.Duration = time.Since(start)
@@ -316,7 +317,19 @@ func printResults(nbSuccess int, nbError int, events []structs.Event) {
 		// Compute avg time by letter
 		avgPerLetter := float64(event.Duration) / float64(len(event.Word))
 		avgDuration := time.Duration(avgPerLetter)
-		wordsResult = append(wordsResult, []string{event.Word, event.Duration.String(), avgDuration.String(), event.Attempts.String(), strconv.Itoa(event.Deletion)})
+
+		errors := event.Attempts.String()
+		if event.Errors > 0 {
+			errors = strconv.Itoa(event.Errors) + " / " + errors
+		}
+
+		wordsResult = append(wordsResult, []string{
+			event.Word,
+			event.Duration.String(),
+			avgDuration.String(),
+			errors,
+			strconv.Itoa(event.Deletion),
+		})
 
 		totalDuration += event.Duration
 		totalDurationPerLetter += avgDuration
