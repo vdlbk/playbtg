@@ -311,6 +311,8 @@ func printResults(nbSuccess int, nbError int, events []structs.Event) {
 	wordsResult := make([][]string, 0)
 	deletions := 0
 	charsToReview := make(structs.AnalysisMap)
+	currentStreak := 0
+	maxStreak := -1
 	for _, event := range events {
 		event.AnalyzeAttempts(&charsToReview)
 
@@ -321,6 +323,12 @@ func printResults(nbSuccess int, nbError int, events []structs.Event) {
 		errors := event.Attempts.String()
 		if event.Errors > 0 {
 			errors = strconv.Itoa(event.Errors) + " / " + errors
+			if currentStreak > maxStreak {
+				maxStreak = currentStreak
+			}
+			currentStreak = 0
+		} else {
+			currentStreak++
 		}
 
 		wordsResult = append(wordsResult, []string{
@@ -346,10 +354,15 @@ func printResults(nbSuccess int, nbError int, events []structs.Event) {
 	wordsResult = append(wordsResult, []string{"Average", dAVGDuration.String(), dTotalAVGPerLetter.String(), "", fmt.Sprintf("%.2f", float64(deletions)/float64(len(events)))})
 	wordsResult = append(wordsResult, []string{"WPM", fmt.Sprintf("%.2f", wpm), "", "", ""})
 
+	if currentStreak > maxStreak {
+		maxStreak = currentStreak
+	}
+
 	resultData := [][]string{
 		{"Success", strconv.Itoa(nbSuccess), fmt.Sprintf("%.2f%s", percentageOfSuccess, "%")},
 		{"Error", strconv.Itoa(nbError), fmt.Sprintf("%.2f%s", 100-percentageOfSuccess, "%")},
 		{"Total", strconv.Itoa(nbSuccess + nbError), "100.00%"},
+		{"Max streak", strconv.Itoa(maxStreak), ""},
 	}
 
 	renderer.RenderTitle(1, "Results")
