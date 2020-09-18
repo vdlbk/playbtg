@@ -17,6 +17,7 @@ type GameConfig struct {
 	NumberMode        bool   `json:"number-mode" btg:"Number mode"`
 	NoSpaceMode       bool   `json:"no-space-mode" btg:"No space mode"`
 	InfiniteAttempts  bool   `json:"infinite-attempts" btg:"Infinite attempts"`
+	Chaos             bool   `json:"chaos" btg:"Chaos"`
 	Output            string `json:"output" btg:"Output"`
 	WordSetMinLength  int    `json:"-" btg:"-"`
 	WordSetMaxLength  int    `json:"-" btg:"-"`

@@ -31,6 +31,7 @@ Examples:
 playbtg my_file.txt -i --output=/tmp/result
 
 Flags:
+  -c, --chaos               Chaos mode: the letters you type won't be consistent
   -h, --help                help for playbtg
   -i, --infinite-attempts   You have an infinite numbers of attempts for each words (By default, you only have 1 attempt)
   -s, --no-space-mode       Disable space between words
@@ -61,21 +62,21 @@ Science B*tch!
 
 * [x]  Create uppercase mode
 * [x]  Create mixin uppercase/lowercase mode
-* [x]  Create mode with numbers
+* [x]  Create a mode with numbers
 * [x]  Change the way to catch the user answer, it should be through a key logger or something like this
 * [x]  Compute/Detect errors and display a list of characters on which the user should practice
-* [ ]  Create a fire system (based on: rythm, delay between words, time penalty in case of errors...)
-* [ ]  Create a mode with sentences
-* [ ]  Create a mode with symbols
-* [ ]  Create a mode with line codes
+* [ ]  Create a fire system (based on: rhythm, delay between words, time penalty in case of errors...)
+* [ ]  ~~Create a mode with sentences~~
+* [ ]  ~~Create a mode with symbols~~
+* [ ]  ~~Create a mode with line codes~~
 * [ ]  Compute more stats (standard deviation, percentile?)
 * [ ]  Add [asciigraph](github.com/guptarohit/asciigraph) ??
 * [ ]  Compute stats on word length
 * [ ]  Create a mode with a maximum of word (defined length) in x seconds
-* [ ]  Create a chaos mode which sometimes change the letter you typed randomly
+* [x]  Create a chaos mode which sometimes change the letter you typed randomly
 * [ ]  Save some records
 * [x]  Add a feature to import his own words
-* [ ]  Add a feature to get random wikipedia page
+* [ ]  Add a feature to get random wikipedia page (or any website ?)
 * [x]  Add an option to choose the output (console or file)
 * [x]  Add an option to disable space key/ return key between words
 

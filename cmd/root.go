@@ -51,6 +51,7 @@ func init() {
 	rootCmd.Flags().BoolVarP(&gameConfig.InfiniteAttempts, consts.ParamInfiniteAttempts, "i", false, "You have an infinite numbers of attempts for each words (By default, you only have 1 attempt)")
 	rootCmd.Flags().StringVarP(&gameConfig.Output, consts.ParamOutput, "o", DefaultOutput, "Specify the folder in which it will save the results into a file")
 	rootCmd.Flags().BoolVarP(&gameConfig.NoSpaceMode, consts.ParamNoSpaceMode, "s", false, "Disable space between words")
+	rootCmd.Flags().BoolVarP(&gameConfig.Chaos, consts.ParamChaos, "c", false, "Chaos mode: the letters you type won't be consistent")
 }
 
 func checkConfig(gameConfig structs.GameConfig) error {
@@ -242,6 +243,8 @@ func readWord(event *structs.Event) (string, bool) {
 			return word, false
 		}
 
+		char = chaos(gameConfig, char)
+
 		word += string(char)
 	}
 	return word, false
@@ -284,6 +287,20 @@ func transformWord(word string, config structs.GameConfig) string {
 		word = transformedWord
 	}
 	return word
+}
+
+func chaos(gameConfig structs.GameConfig, c rune) rune {
+	if gameConfig.Chaos {
+		if rand.Float64() > 0.8 {
+			n := rune(rand.Intn(3) + 1)
+			if rand.Float64() > 0.5 {
+				c += n
+			} else {
+				c -= n
+			}
+		}
+	}
+	return c
 }
 
 func printResults(nbSuccess int, nbError int, events []structs.Event) {
