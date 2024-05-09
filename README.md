@@ -7,7 +7,7 @@ The default mode gives you 60 words you have to enter correctly. More mode and c
 
 ## Install / Update
 ```bash
-go get -u github.com/vdlbk/playbtg
+go install github.com/vdlbk/playbtg@latest
 ```
 
 ## Usage 
